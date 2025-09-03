@@ -10,6 +10,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Start Torque environment
+        id: start-environment
+        uses: QualiTorque/torque-start-environment@v1
+        with:
+          space: YourSpaceName
+          blueprint_name: YourBlueprintName
+          torque_token: ${{ secrets.TORQUE_TOKEN }}
+          duration: 120
+          timeout: 30
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -25,3 +35,11 @@ jobs:
 
       - name: Verify file upload
         run: aws s3 ls s3://${{ secrets.S3_BUCKET_NAME }}/
+
+      - name: End Torque environment
+        if: always()
+        uses: QualiTorque/torque-end-environment@v1
+        with:
+          space: YourSpaceName
+          environment_id: ${{ steps.start-environment.outputs.environment_id }}
+          torque_token: ${{ secrets.TORQUE_TOKEN }}
